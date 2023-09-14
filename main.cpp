@@ -44,13 +44,6 @@ int main()
             }
 
         } else if (blinkState == 1) {
-            if (stepTimer.read_ms() > STEP_TIME){ // step blinking
-                stepTimer.stop();
-                stepTimer.reset();
-                led = !led;
-                stepTimer.start();
-            }
-
             if (blinkTimer.read_ms() > BLINKING_DURATION || pressTimer.read_ms() > PULSE_MIN_TIME){
                 blinkState = 0;
                 
@@ -62,6 +55,13 @@ int main()
 
                 pressTimer.stop();
                 pressTimer.reset();
+            }
+
+            if (stepTimer.read_ms() > STEP_TIME){ // step blinking
+                stepTimer.stop();
+                stepTimer.reset();
+                led = !led;
+                stepTimer.start();
             }
         }
     }
