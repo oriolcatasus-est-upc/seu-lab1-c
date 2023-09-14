@@ -1,67 +1,67 @@
+/*
+Authors:
+- Oriol
+- Pablo Arancibia Barahona
+*/
+
 #include "mbed.h"
  
 DigitalIn enable(p17);
 DigitalOut led(LED1);
 
-float pulseMinTime = 0.5;
-float blinkingTime = 10;
-float blinkingInterval = 0.1;
-
-Timer timerPIN;
-Timer timerLED;
-
-float prevBlinkingRead = 0;
-
-int statePIN = 0;
-// 0 -> PIN 17 disabled
-// 1 -> PIN 17 enabled for less than 0.5s
-// 2 -> PIN 17 enabled for more than 0.5s
-
-int stateLED = 0;
-// 0 -> LED off
-// 1 -> LED blinking
-
 int main()
 {
+    const int PULSE_MIN_TIME = 500;
+    const int BLINKING_DURATION = 10000;
+    const int STEP_TIME = 100;
+
+    Timer pressTimer;
+    Timer blinkTimer;
+    Timer stepTimer;
+
+    bool stateEnable = false;
+    int blinkState = 0; // 0: off; 1: blinking;
+
     while (true) {
-        if (enable) {
-            if (statePIN == 0) {
-                timerPIN.start();
-                statePIN = 1;
-            }
-            if (statePIN == 1 && timerPIN.read() > pulseMinTime) {
-                timerPIN.stop();
-                timerPIN.reset();
-                statePIN = 2;
-                if (stateLED == 0) {
-                    timerLED.start();
-                    led = true;
-                    stateLED = 1;
-                } else {
-                    timerLED.stop();
-                    timerLED.reset();
-                    prevBlinkingRead = 0;
-                    led = false;
-                    stateLED = 0;
-                }
-            }
-        } else {
-            statePIN = 0;
+        if (enable && !stateEnable){ // if enable is pressed and before was not pressed
+            pressTimer.start();
+            stateEnable = true;
+
+        } else if (!enable && stateEnable){ // if enable is not pressed and before was pressed
+            pressTimer.stop();
+            pressTimer.reset();
+            stateEnable = false;
         }
 
-        if (stateLED == 1) {
-            if (timerLED.read() < blinkingTime) {
-                float diff = timerLED.read() - prevBlinkingRead;
-                if (diff > blinkingInterval) {
-                    led = !led;
-                    prevBlinkingRead = timerLED.read();
-                }
-            } else {
-                timerLED.stop();
-                timerLED.reset();
-                prevBlinkingRead = 0;
-                led = false;
-                stateLED = 0;
+        if (blinkState == 0) { // if is off
+            led = false;
+            if (pressTimer.read_ms() > PULSE_MIN_TIME) {
+                blinkTimer.start()
+                stepTimer.start()
+                blinkState = 1 // start blinking
+                pressTimer.stop();
+                pressTimer.reset();
+            }
+
+        } else if (blinkState == 1) {
+            if (stepTimer.read_ms() > STEP_TIME){ // step blinking
+                stepTimer.stop();
+                stepTimer.reset();
+                led = !led;
+                stepTimer.start();
+            }
+
+            if (blinkTimer.read_ms() > BLINKING_DURATION || pressTimer.read_ms() > PULSE_MIN_TIME){
+                blinkState = 0;
+                
+                blinkTimer.stop();
+                blinkTimer.reset();
+
+                stepTimer.stop();
+                stepTimer.reset();
+
+                pressTimer.stop();
+                pressTimer.reset();
             }
         }
     }
