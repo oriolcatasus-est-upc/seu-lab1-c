@@ -1,6 +1,6 @@
 /*
 Authors:
-- Oriol
+- Oriol Catasús Llena
 - Pablo Arancibia Barahona
 */
 
@@ -36,9 +36,9 @@ int main()
         if (blinkState == 0) { // if is off
             led = false;
             if (pressTimer.read_ms() > PULSE_MIN_TIME) {
-                blinkTimer.start()
-                stepTimer.start()
-                blinkState = 1 // start blinking
+                blinkTimer.start();
+                stepTimer.start();
+                blinkState = 1; // start blinking
                 pressTimer.stop();
                 pressTimer.reset();
             }
